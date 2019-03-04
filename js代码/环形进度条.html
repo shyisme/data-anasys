@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <canvas id=”c1″ width=”400″ height=”400″></canvas>
+    <script>
+        var t = 99
+        var oC = document.getElementById("c1")
+        var oGC = oC.getContext('2d')
+        var oBa = (-90) * Math.PI / 180
+        var oR = (-25 + t) * 3.6 * Math.PI / 180
+        function toDraw() {
+            var x = 200
+            var y = 200
+            var z = 150
+
+            oGC.strokeStyle = '#abcdef'
+            oGC.lineWidth = '10';
+            oGC.beginPath();
+            oGC.arc(x, y, r, oB, oR, false);
+            oGC.stroke();
+            oGC.font = "Bold 50px Arial";
+            oGC.fillStyle = "#ccc";
+            oGC.textAlign = "center";
+            oGC.fillText(t + '%', x, y + 10);
+            document.getElementById('num').innerHTML = t + '%';
+
+        }
+        toDraw()
+    </script>
+
+</body>
+</html>
