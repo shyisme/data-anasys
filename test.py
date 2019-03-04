@@ -4,30 +4,30 @@ Created on Tue Jun 12 11:57:04 2018
 
 @author: shy
 """
+
 import ode
 import numpy as np
 import pandas as pd
 import copy
 import matplotlib.pyplot as plt
-import os
 
-a=1
-b_0=10
-c=6
-d=2
-e=1
-f=0.5
-c_0=6
-d_0=2
-e_0=1
-f_0=0.5
-h=10
+a=10
+b_0=60
+c=8
+d=6
+e=7
+f=5
+c_0=8
+d_0=6
+e_0=7
+f_0=5
+h=14
 i_0=15
-j_0=10
-l_0=8
+j_0=20
+l_0=15
 m=4
 v=0.199
-w=-0.199+0.999
+w=0.199+0.999
 p=0.5
 t=1.1
 r=0.9
@@ -36,7 +36,7 @@ s=0.8
 
 def fy(t,X):
     global p
-    p=w+v/X[1]
+    p=w-v/X[1]
     if p<0:
         p=0
     elif p>1:
@@ -58,7 +58,7 @@ def fy(t,X):
 
 def fz(t,X):
     global p
-    p=w+v/X[1]
+    p=w-v/X[1]
     if p<0:
         p=0
     elif p>1:
@@ -82,15 +82,7 @@ def fz(t,X):
          x_2,
          x_3]
     return dX
-solve=[[ 0,  1,  0],
-       [  1,  1,  0],
-       [ 0,  1,  1],
-       [  1,  1,  1],
-    
-       [1,  v*j_0/(w*j_0+c+e-h), 1],
-    
-       [  0,  -i_0*v/(-i_0*w+h),  0],
-       [  0,  -j_0*v/(-j_0*w+h),  1]]
+solve=[[ 0,  1,  0],[  1,  1,  0],[ 0,  1,  1],[  1,  1,  1],[  1,  j_0*v/(j_0*w+c+e-h),  1],[  0,  -i_0*v/(-i_0*w+h),  0],[  0,  -j_0*v/(-j_0*w+h),  1]]
 solve_modify=[[  0,  1,  0],
               [  1,  1,  0],
               [  0 , w*v*i_0/h,0],
@@ -110,17 +102,8 @@ t_euler, x_euler = ode.euler(
         )
 X=np.array(x_euler)
 T=np.array(t_euler)
-variable=['The ratio of GSA to inspection','The ratio of GC to safe investmentratio','the ratio of SE to supervise']
+variable=['The ratio of government regulators to monitoring','The ratio of total contracting to safe investmentratio state safety of supervise','ratio state safety of supervise']
 
-def save_result_to_excel(name,result): 
-    booksheetname=["GSA","GC","SE"]
-    writer=pd.ExcelWriter(name+'.xlsx')
-    for i in range(3):
-        result_pd=pd.DataFrame(result[i])
-        result_pd.to_excel(writer,'{a}'.format(a=booksheetname[i]))
-    
-    writer.save()
-    
 def simulite(k,fy):
 
     t_euler, x_euler = ode.euler(
@@ -150,25 +133,19 @@ def diff_result(k):
 
 def fig(T,X,titles,figname):
     variable=titles
-   
-        
 
-    #plt.figure(figsize=[24,18])
+    plt.figure(figsize=[30,18])
     for i in range(3):
-#        ax=plt.subplot(3,1,i+1)
-        plt.figure(figsize=[10,4])
-        plt.plot(T, X[i,:,0],marker=r"$1$",markevery=100,markersize=8)
-        plt.plot(T, X[i,:,1],marker=r"$2$",markevery=100,markersize=8)
-        plt.plot(T, X[i,:,2],marker=r"$3$",markevery=100,markersize=8)
-        #plt.setp(marker=['1','2','3'])
-        plt.title('{a} has change, the corresponding changes of other'.format(a=variable[i]),fontsize=14)
-        plt.xlabel('Time step',fontsize=14)
-        plt.ylabel('proportion',fontsize=14)
-        plt.legend(labels=variable,loc='best',fontsize=14)
-        plt.savefig('{b}{a}.png'.format(a=variable[i],b=figname),dpi=900)
-        plt.show()
+        ax=plt.subplot(3,1,i+1)
+        ax.plot(T, X[i,:,0],'r--',T, X[i,:,1],'b*',T, X[i,:,2],'g^')
+        ax.set(xlabel='Time step', ylabel='proportion',
+               title='{a} has change, the corresponding changes of other'.format(a=variable[i]))
+        plt.legend(labels=variable,loc='best', fancybox=True,markerscale=0.2)
 
 
+
+    plt.savefig('{a}.jpg'.format(a=figname),dpi=500)
+    plt.show()
 def sim(Solve,s,fy):
     for i in range(len(Solve)):
         result=diff_result(Solve[i]).tolist()
@@ -176,25 +153,35 @@ def sim(Solve,s,fy):
         for j in range(3):
             wwww[j]=simulite(result[j],fy)
         wwwww=np.array(wwww)
-        
-        save_result_to_excel('this is {b} {a}'.format(a=str(Solve[i]),b=s),wwwww)
         fig(T,wwwww,variable,'this is {b} {a}'.format(a=str(Solve[i]),b=s))
 
-sim(solve,'base model',fy)
-sim(solve_modify,'modify model',fz)
 
 
 
+sample=np.random.random((100,3))
+def sim_random(sample,func):
+    result=[]
+    for i in range(sample.shape[0]):
+        result.append(simulite(sample[i],func))
+    return result
 
-
-
-
-
-
-
-
-
-
+jjjj=np.array(sim_random(sample,fy))
+gggg=np.array(sim_random(sample,fz))
+first_1=jjjj[:,0,:]
+end_1=jjjj[:,3000,:]
+first_2=gggg[:,0,:]
+end_2=gggg[:,3000,:]
+plt.figure(figsize=[30,18])
+ax1=plt.subplot(2,1,1)
+yy_1=ax1.hist(end_1)
+ax1.set(xlabel='proportion',ylabel='persention',title='modify modle')
+plt.legend(labels=variable,loc='best')
+ax2=plt.subplot(2,1,2)
+yy_2=ax2.hist(end_2)
+ax2.set(xlabel='proportion',ylabel='persention',title='modify modle')
+plt.legend(labels=variable,loc='best')
+plt.savefig('compilt.png',dpi=500)
+plt.show()
 
 
 
